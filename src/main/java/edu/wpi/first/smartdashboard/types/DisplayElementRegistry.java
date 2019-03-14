@@ -59,9 +59,13 @@ public class DisplayElementRegistry {
    *     ignored.
    */
   public static void registerStaticWidget(Class<? extends StaticWidget> clazz) {
-    if (!Modifier.isAbstract(clazz.getModifiers())) {
-      staticWidgets.add(clazz);
+    if (Modifier.isAbstract(clazz.getModifiers())) {
+      throw new RuntimeException("Static Widget " + clazz.getName() + " can't be abstract");
     }
+    if (!Modifier.isPublic(clazz.getModifiers())) {
+      throw new RuntimeException("Static Widget " + clazz.getName() + " must be public");
+    }
+    staticWidgets.add(clazz);
     // TODO made this complain if given a normal widget, or make it call
     // registerWidget
   }
@@ -83,7 +87,10 @@ public class DisplayElementRegistry {
    */
   public static void registerWidget(Class<? extends Widget> clazz) {
     if (Modifier.isAbstract(clazz.getModifiers())) {
-      return;
+      throw new RuntimeException("Widget " + clazz.getName() + " can't be abstract");
+    }
+    if (!Modifier.isPublic(clazz.getModifiers())) {
+      throw new RuntimeException("Widget " + clazz.getName() + " must be public");
     }
 
     DataType[] types = null;
@@ -92,28 +99,39 @@ public class DisplayElementRegistry {
       Field field = clazz.getDeclaredField("TYPES");
       int modifiers = field.getModifiers();
       if (!Modifier.isStatic(modifiers)) {
-        throw new RuntimeException("TYPES must be static");
+        throw new RuntimeException(
+          "field TYPES of Widget" + clazz.getName() + " must be static"
+        );
       } else if (!Modifier.isFinal(modifiers)) {
-        throw new RuntimeException("TYPES must be final");
+        throw new RuntimeException(
+          "field TYPES of Widget" + clazz.getName() + " must be final"
+        );
       }
       types = (DataType[]) field.get(null);
       declaredTypes.put(clazz, types);
     } catch (IllegalArgumentException ex) {
       assert false;
     } catch (IllegalAccessException ex) {
-      throw new RuntimeException("TYPES must be public");
+      throw new RuntimeException(
+        "field TYPES of Widget" + clazz.getName() + " must be public"
+      );
     } catch (NoSuchFieldException ex) {
-      throw new RuntimeException("Every ValueBasedDisplayElement must have a TYPES static field "
-          + "of type DataType[]");
+      throw new RuntimeException(
+        "Widget " + clazz.getName() + " must have a static field TYPES of type DataType[]"
+      );
     } catch (SecurityException ex) {
       ex.printStackTrace();
       return;
     } catch (ClassCastException ex) {
-      throw new RuntimeException("TYPES must be of type Type[]");
+      throw new RuntimeException(
+        "field TYPES of Widget " + clazz.getName() + " must be of type Type[]"
+      );
     }
 
     if (types == null) {
-      throw new RuntimeException("TYPES must not be null");
+      throw new RuntimeException(
+        "field TYPES of Widget " + clazz.getName() + " must not be null"
+      );
     }
 
     for (DataType type : types) {
