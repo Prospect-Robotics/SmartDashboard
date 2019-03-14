@@ -112,11 +112,19 @@ public class FileSniffer {
               className = className.replace('/', '.');
               Class<?> clazz = classLoader.loadClass(className);
               if (Widget.class.isAssignableFrom(clazz)) {
-                System.out.println("Custom Widget Loaded: " + clazz.getSimpleName());
-                DisplayElementRegistry.registerWidget(clazz.asSubclass(Widget.class));
+                try {
+                  DisplayElementRegistry.registerWidget(clazz.asSubclass(Widget.class));
+                  System.out.println("Custom Widget Loaded: " + clazz.getSimpleName());
+                } catch (Exception e2) {
+                  e2.printStackTrace();
+                }
               } else if (StaticWidget.class.isAssignableFrom(clazz)) {
-                System.out.println("Custom Static Widget Loaded: " + clazz.getSimpleName());
-                DisplayElementRegistry.registerStaticWidget(clazz.asSubclass(StaticWidget.class));
+                try {
+                  DisplayElementRegistry.registerStaticWidget(clazz.asSubclass(StaticWidget.class));
+                  System.out.println("Custom Static Widget Loaded: " + clazz.getSimpleName());
+                } catch (Exception e2) {
+                  e2.printStackTrace();
+                }
               }
             } catch (ClassNotFoundException e) {
               e.printStackTrace();
